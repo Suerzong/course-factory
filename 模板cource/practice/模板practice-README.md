@@ -12,6 +12,8 @@
 
 - `task-generation-rules.md`：AI 出题和任务生成必须遵守的规则。
 - `daily-diagnostics.md`：每节或每日 3-5 题诊断短测模板。
+- `chapter-test.md`：章测触发条件、出题范围、通过标准和模板。
+- `review-session.md`：间隔复习触发条件、出题规则、判定标准和模板。
 
 ## 使用顺序
 

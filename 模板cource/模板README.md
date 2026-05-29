@@ -40,17 +40,32 @@
 
 AI 教学某一小节时，应按以下顺序读取：
 
-1. `course-rules.md`：确认课程边界、允许源、禁止源和出题边界。
+**阶段一：配置**
+1. `course-rules.md`：确认课程边界、源隔离、禁止源。
 2. `agent-persona.md`：确认教学姿态、反馈风格和边界感。
 3. `mastery-loop.md`：确认 Two Sigma 掌握循环。
-4. `progress/current-position.md`：确认当前讲到哪里、状态是什么、下一单元是什么。
-5. `learning-path/chapter-XX.md`：确认本章教学顺序、对应知识点指引和教材段落。
-6. `knowledge/teaching-guides/*.teaching.md`：确认知识点覆盖范围、重要性、出题权限和本节不要求。
-7. `textbook/chapters/*.md`：按知识点指引指定段落读取教材原文。
-8. `practice/task-generation-rules.md` 和 `practice/daily-diagnostics.md`：需要练习、短测或再测时确认边界和模板。
-9. `review/mistakes.md`、`progress/mastery-tracker.md` 和 `logs/learning-sessions/`：教学结束后记录错题、掌握度和学习会话。
 
-`textbook/index.md` 用于校验教材文件、段落范围、公式密集区和习题/参考文献标记。
+**阶段二：导航**
+4. `progress/current-position.md`：确认当前单元、状态、教材段落。
+5. `learning-path/course-map.md`：确认章级导航。
+6. `learning-path/chapter-XX.md`：确认本章教学顺序、下一单元。
+
+**阶段三：复习检查**
+7. `review/concept-cards.md`：检查是否有到期复习卡片。若有，先执行间隔复习再进入新内容。
+
+**阶段四：内容**
+8. `knowledge/teaching-guides/*.teaching.md`：确认核心知识点、重要背景、了解即可、出题权限和本节不要求。
+9. `textbook/index.md`：校验段落号。
+10. `textbook/chapters/*.md`：按知识点指引指定段落读取教材原文。
+
+**阶段五：练习**
+11. `practice/task-generation-rules.md` 和 `practice/daily-diagnostics.md`：需要练习、短测或再测时确认边界和模板。
+12. `practice/chapter-test.md`：到达章测单元时，确认章测规则。
+
+**阶段六：更新**
+13. `progress/mastery-tracker.md`、`review/mistakes.md` 和 `logs/learning-sessions/`：教学结束后记录掌握度、错题和学习会话。
+14. `progress/student-view.md`：同步更新学生视图。
+15. `review/concept-cards.md`：更新概念卡片和复习调度。
 
 知识点指引只控制教学范围和权重，不替代教材原文。
 
@@ -59,7 +74,11 @@ AI 教学某一小节时，应按以下顺序读取：
 当前课程采用以下轻量闭环：
 
 ```text
-课程规则 -> Agent 人格 -> 掌握循环 -> 当前进度 -> 学习路线 -> 知识点指引 -> 教材原文 -> 诊断 -> 个性化教学 -> 立即练习 -> 反馈纠错 -> 针对性补救 -> 再测达标 -> 掌握度更新 -> 学习日志
+配置（课程规则 -> Agent 人格 -> 掌握循环）
+  -> 导航（当前进度 -> 章级导航 -> 学习路线）
+  -> 内容（知识点指引 -> 教材索引 -> 教材原文）
+  -> Two Sigma 循环（诊断 -> 目标 -> 讲解 -> 练习 -> 反馈 -> 错因 -> 补救 -> 再测 -> 达标 -> 推进）
+  -> 更新（掌握度 -> 错题 -> 学习日志）
 ```
 
 该闭环只服务 {{COURSE_SHORT_NAME}} 主课，不实现 RAG、多 agent、复杂命令系统或自动化脚本。

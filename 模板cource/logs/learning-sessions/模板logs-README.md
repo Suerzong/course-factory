@@ -28,17 +28,35 @@ YYYY-MM-DD-chXX-unit-id.md
 
 ## 本次读取
 
+**阶段一：配置**
 - 课程规则：`course-rules.md`
 - Agent 人格：`agent-persona.md`
 - 掌握循环：`mastery-loop.md`
+
+**阶段二：导航**
 - 当前进度：`progress/current-position.md`
-- 掌握度：`progress/mastery-tracker.md`
-- 错题复盘：`review/mistakes.md`
-- 学习路线：
+- 章级导航：`learning-path/course-map.md`
+- 学习路线：`learning-path/chapter-XX.md`
+
+**阶段三：复习检查**
+- 概念卡片：`review/concept-cards.md`
+- 到期复习：
+
+**阶段四：内容**
 - 知识点指引：
+- 教材索引：`textbook/index.md`
 - 教材原文：
+
+**阶段五：练习**
 - 练习规则：`practice/task-generation-rules.md`
 - 诊断短测：`practice/daily-diagnostics.md`
+- 章测规则：`practice/chapter-test.md`
+
+**阶段六：更新**
+- 掌握度：`progress/mastery-tracker.md`
+- 错题复盘：`review/mistakes.md`
+- 学生视图：`progress/student-view.md`
+- 概念卡片：`review/concept-cards.md`
 
 ## 教学覆盖
 
@@ -48,6 +66,13 @@ YYYY-MM-DD-chXX-unit-id.md
 - 重要背景：
 - 了解即可：
 - 本节不要求：
+
+## 间隔复习记录
+
+- 是否有到期卡片：
+- 复习数量：
+- 正确/错误/需巩固：
+- 复习用时：
 
 ## Two Sigma 循环记录
 
@@ -134,7 +159,7 @@ YYYY-MM-DD-chXX-unit-id.md
 
 学习日志合格前必须逐项确认：
 
-- [ ] 包含 `## 本次入口`、`## 本次读取`、`## 教学覆盖`、`## Two Sigma 循环记录`、`## 更新记录`、`## 下次入口`。
+- [ ] 包含 `## 本次入口`、`## 本次读取`、`## 教学覆盖`、`## 间隔复习记录`、`## Two Sigma 循环记录`、`## 更新记录`、`## 下次入口`。
 - [ ] `Two Sigma 循环记录` 下包含 1-10 步的小标题。
 - [ ] 记录正式题范围、题目来源、正确率证据和核心题是否通过。
 - [ ] 若有补救，记录补救目标、再测题来源、再测正确率和推进依据。

@@ -18,15 +18,15 @@
 
 | 步骤 | 动作 | 读取依据 | 输出 |
 |---:|---|---|---|
-| 1 | 诊断当前水平 | `progress/current-position.md`, `progress/mastery-tracker.md`, `review/mistakes.md` | 本单元当前等级、已知弱点、是否需要预诊断 |
-| 2 | 明确学习目标 | `learning-path/chapter-XX.md`, `knowledge/coverage/chapter-XX-coverage.md`, `knowledge/teaching-guides/...` | 本节目标、教材段落、掌握边界 |
+| 1 | 诊断当前水平 | `progress/current-position.md`, `progress/mastery-tracker.md`, `review/mistakes.md`, `review/concept-cards.md` | 本单元当前等级、已知弱点、是否有到期复习；若有到期卡片，先执行间隔复习再进入新内容诊断 |
+| 2 | 明确学习目标 | `learning-path/chapter-XX.md`, `knowledge/teaching-guides/.../*.teaching.md` | 本节目标、教材段落、掌握边界 |
 | 3 | 个性化讲解 | `knowledge/teaching-guides/...`, `textbook/chapters/...` | 针对弱点和核心知识点的讲解 |
-| 4 | 立即练习 | `practice/task-generation-rules.md`, `practice/chapter-XX-unit-spec.md` | 3-5 道带对应单元和来源标注的练习题 |
+| 4 | 立即练习 | `practice/task-generation-rules.md` | 3-5 道带对应单元和来源标注的练习题 |
 | 5 | 批改与反馈 | 学习者回答、教材依据、知识点指引 | 每题反馈、正确率、初步弱点 |
 | 6 | 错因分析 | `review/mistakes.md` 模板 | 错误类型、错误原因、正确理解 |
 | 7 | 针对性补救 | 错因分析、知识点指引、教材原文 | 补救讲解、补救任务 |
 | 8 | 再次检测 | `practice/daily-diagnostics.md` | 再测题、再测正确率 |
-| 9 | 达到掌握标准 | `progress/README.md` 推进规则 | 是否允许推进 |
+| 9 | 达到掌握标准 | `progress/README.md` 推进规则、状态流转表 | 是否允许推进、状态流转到哪个值 |
 | 10 | 进入下一个知识点 | `learning-path/chapter-XX.md` 的下一单元 | 更新 `progress/current-position.md` |
 
 ## 掌握标准
@@ -54,7 +54,9 @@ AI 讲解时必须根据诊断结果调整：
 
 - `progress/current-position.md`
 - `progress/mastery-tracker.md`
+- `progress/student-view.md`
 - `review/mistakes.md`
+- `review/concept-cards.md`
 - `logs/learning-sessions/YYYY-MM-DD-*.md`
 
 如果没有更新当前入口，下一轮学习会断链。

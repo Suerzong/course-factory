@@ -130,3 +130,57 @@ AI 教学任意小节前，必须按顺序读取：
 | 模板logs-README.md | `logs/learning-sessions/README.md` | {{COURSE_SHORT_NAME}} |
 | 模板course-map.md | `learning-path/course-map.md` | {{COURSE_SHORT_NAME}}, {{COURSE_NAME}} |
 | 模板README.md | `README.md` | {{COURSE_NAME}}, {{COURSE_SHORT_NAME}} |
+| 模板current-position.md | `progress/current-position.md` | {{COURSE_SHORT_NAME}}, {{TEXTBOOK_TITLE}} |
+| 模板mastery-tracker.md | `progress/mastery-tracker.md` | {{COURSE_SHORT_NAME}} |
+| 模板chapter-test.md | `practice/chapter-test.md` | {{COURSE_SHORT_NAME}} |
+| 模板student-view.md | `progress/student-view.md` | {{COURSE_SHORT_NAME}} |
+| 模板concept-cards.md | `review/concept-cards.md` | {{COURSE_SHORT_NAME}} |
+| 模板review-session.md | `practice/review-session.md` | {{COURSE_SHORT_NAME}} |
+
+---
+
+## 初始化操作清单
+
+变量填写完毕后，按以下顺序生成课程文件：
+
+### 第一步：生成教材层
+
+- [ ] 将教材 PDF 放入 `textbook/pdf/`
+- [ ] 按章节分割 Markdown，放入 `textbook/chapters/`
+- [ ] 标注 ¶XXXX 段落号
+- [ ] 迁移图片到 `textbook/chapters/img/`
+- [ ] 生成 `textbook/index.md`
+
+### 第二步：生成教学控制层
+
+- [ ] 生成 `knowledge/teaching-guides/chapter-XX/` 各小节教学指引
+- [ ] 生成 `learning-path/chapter-XX.md` 各章学习路线
+- [ ] 生成 `learning-path/course-map.md` 章级导航
+
+### 第三步：生成模板文件
+
+- [ ] 用变量替换所有 `模板*.md` 文件中的 `{{VAR}}`
+- [ ] 生成 `course-rules.md`
+- [ ] 生成 `agent-persona.md`
+- [ ] 生成 `mastery-loop.md`
+- [ ] 生成 `practice/task-generation-rules.md`
+- [ ] 生成 `practice/daily-diagnostics.md`
+- [ ] 生成 `practice/chapter-test.md`
+- [ ] 生成 `practice/review-session.md`
+- [ ] 生成各目录 README.md
+
+### 第四步：初始化状态文件
+
+- [ ] 生成 `progress/current-position.md`（指向第1章第1个单元）
+- [ ] 生成 `progress/mastery-tracker.md`（第1章单元行 + 后续章节状态表）
+- [ ] 生成 `progress/student-view.md`（初始进度视图）
+- [ ] 生成 `review/mistakes.md`（空模板）
+- [ ] 生成 `review/concept-cards.md`（空模板）
+- [ ] 创建 `logs/learning-sessions/` 目录
+
+### 第五步：验证
+
+- [ ] 所有文件无残留 `{{VAR}}` 占位符
+- [ ] 所有文件无残留旧课程名
+- [ ] 读取顺序 6 阶段 15 步可完整走通
+- [ ] current-position.md 指向的单元、指引、段落互相一致
