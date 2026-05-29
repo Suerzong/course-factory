@@ -114,28 +114,49 @@ AI 教学任意小节前，必须按顺序读取：
 
 ## 模板文件清单
 
-所有模板文件位于 `guide/neural-networks/` 目录下，带 `模板` 前缀：
+所有模板文件位于 `guide/模板course/` 目录下，带 `模板` 前缀：
 
-| 模板文件 | 生成目标 | 变量替换 |
+| 模板文件（相对模板目录） | 生成目标 | 变量替换 |
 |---|---|---|
+| 模板README.md | `README.md` | {{COURSE_NAME}}, {{COURSE_SHORT_NAME}} |
 | 模板course-rules.md | `course-rules.md` | 11 个变量 |
 | 模板agent-persona.md | `agent-persona.md` | {{COURSE_SHORT_NAME}}, {{TEXTBOOK_TITLE}} |
-| 模板mastery-loop.md | `mastery-loop.md` | 无需替换（已干净） |
-| 模板task-generation-rules.md | `practice/task-generation-rules.md` | {{COURSE_SHORT_NAME}} |
-| 模板daily-diagnostics.md | `practice/daily-diagnostics.md` | {{COURSE_SHORT_NAME}} |
-| 模板practice-README.md | `practice/README.md` | {{COURSE_SHORT_NAME}} |
-| 模板progress-README.md | `progress/README.md` | {{COURSE_SHORT_NAME}} |
-| 模板review-README.md | `review/README.md` | {{COURSE_SHORT_NAME}} |
-| 模板mistakes.md | `review/mistakes.md` | {{COURSE_SHORT_NAME}} |
-| 模板logs-README.md | `logs/learning-sessions/README.md` | {{COURSE_SHORT_NAME}} |
-| 模板course-map.md | `learning-path/course-map.md` | {{COURSE_SHORT_NAME}}, {{COURSE_NAME}} |
-| 模板README.md | `README.md` | {{COURSE_NAME}}, {{COURSE_SHORT_NAME}} |
-| 模板current-position.md | `progress/current-position.md` | {{COURSE_SHORT_NAME}}, {{TEXTBOOK_TITLE}} |
-| 模板mastery-tracker.md | `progress/mastery-tracker.md` | {{COURSE_SHORT_NAME}} |
-| 模板chapter-test.md | `practice/chapter-test.md` | {{COURSE_SHORT_NAME}} |
-| 模板student-view.md | `progress/student-view.md` | {{COURSE_SHORT_NAME}} |
-| 模板concept-cards.md | `review/concept-cards.md` | {{COURSE_SHORT_NAME}} |
-| 模板review-session.md | `practice/review-session.md` | {{COURSE_SHORT_NAME}} |
+| 模板mastery-loop.md | `mastery-loop.md` | 无需替换 |
+| practice/模板task-generation-rules.md | `practice/task-generation-rules.md` | {{COURSE_SHORT_NAME}} |
+| practice/模板daily-diagnostics.md | `practice/daily-diagnostics.md` | {{COURSE_SHORT_NAME}} |
+| practice/模板chapter-test.md | `practice/chapter-test.md` | {{COURSE_SHORT_NAME}} |
+| practice/模板review-session.md | `practice/review-session.md` | {{COURSE_SHORT_NAME}} |
+| practice/模板practice-README.md | `practice/README.md` | {{COURSE_SHORT_NAME}} |
+| progress/模板progress-README.md | `progress/README.md` | {{COURSE_SHORT_NAME}} |
+| progress/模板current-position.md | `progress/current-position.md` | {{COURSE_NAME}}, {{COURSE_SHORT_NAME}}, {{TEXTBOOK_TITLE}} |
+| progress/模板mastery-tracker.md | `progress/mastery-tracker.md` | {{COURSE_SHORT_NAME}} |
+| progress/模板student-view.md | `progress/student-view.md` | {{COURSE_SHORT_NAME}} |
+| review/模板review-README.md | `review/README.md` | {{COURSE_SHORT_NAME}} |
+| review/模板mistakes.md | `review/mistakes.md` | {{COURSE_SHORT_NAME}} |
+| review/模板concept-cards.md | `review/concept-cards.md` | {{COURSE_SHORT_NAME}} |
+| logs/learning-sessions/模板logs-README.md | `logs/learning-sessions/README.md` | {{COURSE_SHORT_NAME}} |
+| learning-path/模板course-map.md | `learning-path/course-map.md` | {{COURSE_SHORT_NAME}}, {{COURSE_NAME}} |
+| learning-path/模板chapter-01.md | `learning-path/chapter-01.md` | {{COURSE_SHORT_NAME}} |
+| knowledge/模板README.md | `knowledge/README.md` | 无需替换 |
+| knowledge/teaching-guides/模板README.md | `knowledge/teaching-guides/README.md` | 无需替换 |
+| knowledge/teaching-guides/模板TEMPLATE.md | `knowledge/teaching-guides/TEMPLATE.md` | 无需替换 |
+| learning-path/模板README.md | `learning-path/README.md` | 无需替换 |
+| textbook/模板README.md | `textbook/README.md` | 无需替换 |
+| textbook/模板index.md | `textbook/index.md` | 无需替换 |
+
+### Claude Code 封装文件
+
+以下文件用于将流水线封装为 Claude Code skill，位于 `guide/` 目录下：
+
+| 文件 | 路径 | 作用 |
+|---|---|---|
+| 阶段文件（11 个） | `guide/pipeline/stage-{a-k}.md` | 从 guide.md 摘出的各阶段完整执行指令 |
+| Skill | `guide/.claude/skills/init-course/SKILL.md` | 课程生成流水线 skill |
+| Command | `guide/.claude/commands/init-course.md` | 用户入口命令 |
+| Hook 1 | `guide/.claude/hooks/validate-teaching-guide.sh` | 校验 .teaching.md 文件结构 |
+| Hook 2 | `guide/.claude/hooks/validate-chapter-path.sh` | 校验 chapter-XX.md 文件结构 |
+| Hook 3 | `guide/.claude/hooks/validate-paragraph-numbering.sh` | 校验段落号连续性 |
+| Settings | `guide/.claude/settings.local.json` | Hook 注册配置 |
 
 ---
 
@@ -143,7 +164,14 @@ AI 教学任意小节前，必须按顺序读取：
 
 变量填写完毕后，按以下顺序生成课程文件：
 
-### 第一步：生成教材层
+### 第一步：复制模板 + 变量替换
+
+- [ ] 将 `guide/模板course/` 整体复制到课程文件夹
+- [ ] 将所有模板文件中的 `{{VAR}}` 占位符替换为实际变量值
+- [ ] 重命名：去掉所有文件名中的"模板"前缀
+- [ ] 确认无残留 `{{` 或 `}}`
+
+### 第二步：生成教材层
 
 - [ ] 将教材 PDF 放入 `textbook/pdf/`
 - [ ] 按章节分割 Markdown，放入 `textbook/chapters/`
@@ -151,23 +179,11 @@ AI 教学任意小节前，必须按顺序读取：
 - [ ] 迁移图片到 `textbook/chapters/img/`
 - [ ] 生成 `textbook/index.md`
 
-### 第二步：生成教学控制层
+### 第三步：生成教学控制层
 
 - [ ] 生成 `knowledge/teaching-guides/chapter-XX/` 各小节教学指引
 - [ ] 生成 `learning-path/chapter-XX.md` 各章学习路线
 - [ ] 生成 `learning-path/course-map.md` 章级导航
-
-### 第三步：生成模板文件
-
-- [ ] 用变量替换所有 `模板*.md` 文件中的 `{{VAR}}`
-- [ ] 生成 `course-rules.md`
-- [ ] 生成 `agent-persona.md`
-- [ ] 生成 `mastery-loop.md`
-- [ ] 生成 `practice/task-generation-rules.md`
-- [ ] 生成 `practice/daily-diagnostics.md`
-- [ ] 生成 `practice/chapter-test.md`
-- [ ] 生成 `practice/review-session.md`
-- [ ] 生成各目录 README.md
 
 ### 第四步：初始化状态文件
 
@@ -184,3 +200,13 @@ AI 教学任意小节前，必须按顺序读取：
 - [ ] 所有文件无残留旧课程名
 - [ ] 读取顺序 6 阶段 15 步可完整走通
 - [ ] current-position.md 指向的单元、指引、段落互相一致
+
+### 第六步：生成 Claude Code 封装
+
+- [ ] 生成 `guide/pipeline/stage-a.md` 到 `stage-k.md`（11 个阶段文件）
+- [ ] 生成 `guide/.claude/skills/init-course/SKILL.md`
+- [ ] 生成 `guide/.claude/commands/init-course.md`
+- [ ] 生成 `guide/.claude/hooks/validate-teaching-guide.sh`
+- [ ] 生成 `guide/.claude/hooks/validate-chapter-path.sh`
+- [ ] 生成 `guide/.claude/hooks/validate-paragraph-numbering.sh`
+- [ ] 生成 `guide/.claude/settings.local.json`

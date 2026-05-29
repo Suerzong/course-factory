@@ -232,6 +232,105 @@ course-root/
 
 ---
 
+## 三-B、Claude Code 封装架构
+
+### 机制选择
+
+| 机制 | 用途 | 强制力 |
+|---|---|---|
+| Skill (`init-course`) | 封装 A-K 流水线，按阶段文件分段执行 | 软（prompt 约束） |
+| Hook (PreToolUse) | 校验文件格式（教学指引、学习路径、段落号） | 硬（shell 命令） |
+| Command (`/project:init-course`) | 用户入口 | N/A |
+| 进度跟踪文件 (`pipeline-progress.md`) | 状态机：记录每个阶段的完成状态 | 硬（文件级状态） |
+
+### 文件结构
+
+```text
+guide/
+├── pipeline/                              # 阶段文件（从 guide.md 摘出）
+│   ├── stage-a.md                         # 阶段 A：教材输入
+│   ├── stage-b.md                         # 阶段 B：结构读取
+│   ├── stage-c.md                         # 阶段 C：章节分割
+│   ├── stage-d.md                         # 阶段 D：图片迁移与重命名
+│   ├── stage-e.md                         # 阶段 E：段落号标注
+│   ├── stage-f.md                         # 阶段 F：PDF 迁移
+│   ├── stage-g.md                         # 阶段 G：生成教材索引
+│   ├── stage-h.md                         # 阶段 H：教学指引生成
+│   ├── stage-i.md                         # 阶段 I：学习路径生成
+│   ├── stage-j.md                         # 阶段 J：状态文件初始化
+│   └── stage-k.md                         # 阶段 K：课程目录骨架
+├── .claude/
+│   ├── settings.local.json                # Hook 注册配置
+│   ├── skills/
+│   │   └── init-course/
+│   │       └── SKILL.md                   # 课程生成流水线 skill
+│   ├── hooks/
+│   │   ├── validate-teaching-guide.sh     # 校验 .teaching.md 文件结构
+│   │   ├── validate-chapter-path.sh       # 校验 chapter-XX.md 文件结构
+│   │   └── validate-paragraph-numbering.sh # 校验段落号连续性
+│   └── commands/
+│       └── init-course.md                 # 用户入口命令
+├── guide.md                               # 完整参考文档（不修改）
+├── init-course.md                         # 变量注册表（不修改）
+└── 模板course/                            # 模板文件目录（不修改）
+```
+
+### 执行流程
+
+```text
+用户：/project:init-course <课程文件夹路径>
+↓
+1. 询问模型配置（api_key, base_url, model_id）
+2. 扫描课程文件夹，自动识别 Markdown/img/PDF
+3. 读取 init-course.md 变量表，AI 读教材自动填写 12 个变量，用户确认
+4. 生成 pipeline-progress.md（状态机文件）
+↓
+逐阶段执行（A → B → C → ... → K）：
+  每个阶段：
+    1. 读 pipeline-progress.md 确认当前阶段
+    2. 读 pipeline/stage-{x}.md 获取执行指令
+    3. 严格按指令执行
+    4. 质量门检查（Hook 自动校验 + 自校验）
+    5. 通过 → 更新进度 → 进入下一阶段
+    6. 不通过 → 修正 → 重试
+↓
+全部完成：
+  1. 删除 pipeline-progress.md
+  2. 删除临时文件
+  3. 确认 guide/ 未被修改
+  4. 输出完成报告
+```
+
+### 阶段 H 双 Agent 映射
+
+| guide.md 角色 | Claude Code 实现 |
+|---|---|
+| 上位 Agent（调度层） | Skill 主流程（Claude Code 自身） |
+| 下位 Claude（执行层） | Agent 工具（subagent_type=general-purpose, model=用户配置） |
+
+### 进度跟踪状态机
+
+`pipeline-progress.md` 是执行过程中的状态机文件：
+
+```markdown
+# 课程生成进度
+
+| 阶段 | 状态 | 完成时间 | 备注 |
+|---|---|---|---|
+| A | 待执行 / 已完成 | - |  |
+| B | 待执行 / 已完成 | - |  |
+| ... | ... | ... |  |
+| K | 待执行 / 已完成 | - |  |
+```
+
+规则：
+- 每阶段开始前读取，确认当前阶段为"待执行"
+- 完成后更新为"已完成"
+- 只有当前阶段"已完成"才能进入下一阶段
+- 支持中断恢复
+
+---
+
 ## 四、各模块职责详解
 
 ### 3.1 课程规则层（course-rules.md）

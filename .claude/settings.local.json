@@ -1,0 +1,38 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "*.teaching.md",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/validate-teaching-guide.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "learning-path/chapter-*.md",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/validate-chapter-path.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "textbook/chapters/*.md",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/validate-paragraph-numbering.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(git add *)"
+    ]
+  }
+}
