@@ -5,6 +5,12 @@
 建议命名：
 
 ```text
+{章}-{节}[-{子节}[-{子子节}]]-{英文名}.teaching.md
+```
+
+示例：
+
+```text
 01-01-artificial-intelligence.teaching.md
 01-02-machine-learning.teaching.md
 02-01-basic-concepts.teaching.md
@@ -15,7 +21,7 @@
 1. 先查 `textbook/index.md`。
 2. 再读对应 `.teaching.md`。
 3. 最后按 `.teaching.md` 指定段落读教材原文。
-4. 讲完后按覆盖检查更新学习状态。
+4. 讲完后更新学习状态。
 
 ## 出题权限
 

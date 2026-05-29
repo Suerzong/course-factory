@@ -17,7 +17,7 @@ YYYY-MM-DD-chXX-unit-id.md
 ## 会话日志模板
 
 ```md
-# YYYY-MM-DD：NNDL §X.Y 小节标题
+# YYYY-MM-DD：{{COURSE_SHORT_NAME}} §X.Y 小节标题
 
 ## 本次入口
 
@@ -35,11 +35,9 @@ YYYY-MM-DD-chXX-unit-id.md
 - 掌握度：`progress/mastery-tracker.md`
 - 错题复盘：`review/mistakes.md`
 - 学习路线：
-- 覆盖审计：
 - 知识点指引：
 - 教材原文：
 - 练习规则：`practice/task-generation-rules.md`
-- 单元练习规格：
 - 诊断短测：`practice/daily-diagnostics.md`
 
 ## 教学覆盖
@@ -128,8 +126,8 @@ YYYY-MM-DD-chXX-unit-id.md
 ## 使用规则
 
 - 每次学习结束后记录一次。
-- 必须使用上方完整模板的标题结构，不得用“读取依据/诊断结果/练习结果”替代模板标题。
-- 只记录当前 NNDL 主课证据。
+- 必须使用上方完整模板的标题结构，不得用"读取依据/诊断结果/练习结果"替代模板标题。
+- 只记录当前 {{COURSE_SHORT_NAME}} 主课证据。
 - 不把旧实操经验、代码项目或外部资料写入当前会话结论。
 
 ## 验收清单
@@ -141,5 +139,5 @@ YYYY-MM-DD-chXX-unit-id.md
 - [ ] 记录正式题范围、题目来源、正确率证据和核心题是否通过。
 - [ ] 若有补救，记录补救目标、再测题来源、再测正确率和推进依据。
 - [ ] `更新记录` 写明 `current-position.md`、`mastery-tracker.md`、`review/mistakes.md` 的处理结果。
-- [ ] 若正式练习、补救题或再测题出现核心知识点错误，`review/mistakes.md` 必须有对应条目；日志不得写“无需新增”作为替代。
+- [ ] 若正式练习、补救题或再测题出现核心知识点错误，`review/mistakes.md` 必须有对应条目；日志不得写"无需新增"作为替代。
 - [ ] `下次入口` 能让下一轮直接定位到下一单元。
