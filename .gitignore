@@ -1,0 +1,23 @@
+.claude/settings.local.json
+
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+debug.log
+pipeline-execution.log
+pipeline-progress.md
+pipeline-modification-plan.md
+
+# Local generated course artifacts accidentally created in the guide repo.
+/knowledge/
+
+# Template-source cleanup: keep intentional tracked samples, ignore generated run leftovers.
+/模板course/learning-path/unit-manifest.json
+/模板course/knowledge/teaching-guides/chapter-*/*.teaching.md
+!/模板course/knowledge/teaching-guides/chapter-01/模板01-01.teaching.md
+/模板course/textbook/chapters/[0-9][0-9]-*.md
+!/模板course/textbook/chapters/01-第1章-绪论.md

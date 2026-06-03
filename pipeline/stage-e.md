@@ -118,5 +118,5 @@
 完成记录写入后：
 1. 读取 `COURSE_DIR/pipeline-progress.md`
 2. 找到第一个状态为"待执行"的阶段
-3. 如果找到 -> 读取对应的 `guide/pipeline/stage-{x}.md`，执行该阶段
+3. 如果找到 -> 读取对应的 `GUIDE_ROOT/pipeline/stage-{x}.md`，执行该阶段
 4. 如果没有"待执行"阶段 -> 所有阶段完成，进入清理协议

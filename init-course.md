@@ -114,7 +114,7 @@ AI 教学任意小节前，必须按顺序读取：
 
 ## 模板文件清单
 
-所有模板文件位于 `guide/模板course/` 目录下，带 `模板` 前缀：
+所有模板文件位于 `GUIDE_ROOT/模板course/` 目录下，带 `模板` 前缀。`GUIDE_ROOT` 指当前仓库根目录，不要求实际文件夹名叫 `guide`。
 
 | 模板文件（相对模板目录） | 生成目标 | 变量替换 |
 |---|---|---|
@@ -146,32 +146,33 @@ AI 教学任意小节前，必须按顺序读取：
 
 ### Claude Code 封装文件
 
-以下文件用于将流水线封装为 Claude Code skill，位于 `guide/` 目录下：
+以下文件用于将流水线封装为 Claude Code skill，位于 `GUIDE_ROOT/` 目录下：
 
 | 文件 | 路径 | 作用 |
 |---|---|---|
-| 阶段文件（11 个） | `guide/pipeline/stage-{a-k}.md` | 从 guide.md 摘出的各阶段完整执行指令 |
-| Skill | `guide/.claude/skills/init-course/SKILL.md` | 课程生成流水线 skill |
-| Command | `guide/.claude/commands/init-course.md` | 用户入口命令 |
-| Hook 1 | `guide/.claude/hooks/validate-teaching-guide.py` | 校验 .teaching.md 文件结构 |
-| Hook 2 | `guide/.claude/hooks/validate-chapter-path.py` | 校验 chapter-XX.md 文件结构 |
-| Hook 3 | `guide/.claude/hooks/validate-paragraph-numbering.py` | 校验段落号连续性 |
-| Hook 4 | `guide/.claude/hooks/validate-unit-manifest.py` | 校验 unit-manifest.json 与教材标题结构一致 |
-| Hook 5 | `guide/.claude/hooks/validate-course-map.py` | 校验 course-map.md 与 manifest 一致 |
-| Hook Wrapper | `guide/.claude/hooks/invoke-python-hook.py` | 跨平台以 UTF-8 方式桥接 stdin 到 Python hook |
-| Script 1 | `guide/scripts/build_unit_manifest.py` | 从教材章节稳定生成 unit-manifest.json，并为无三级标题的重负荷二级小节确定性拆出虚拟正式课次 |
-| Script 2 | `guide/scripts/clean_template_artifacts.py` | 清理/检查正式产物目录中的模板示例文件和阶段 A 预生成样例产物 |
-| Script 3 | `guide/scripts/reset_chapter_splits.py` | 阶段 C 拆分前清理旧章节拆分产物 |
-| Script 4 | `guide/scripts/build_teaching_batches.py` | 从 manifest 稳定生成阶段 H 小批次计划 |
-| Script 5 | `guide/scripts/print_teaching_batch_context.py` | 按 batch_id 输出阶段 H 当前批次的 manifest 与原文上下文 |
-| Script 6 | `guide/scripts/stage_h_status.py` | 从 manifest、批次计划和实际文件判断 H 阶段进度与下一批 |
-| Script 7 | `guide/scripts/build_teaching_audit_report.py` | 从 manifest 和批次计划稳定生成教学指引审查报告 |
-| Script 8 | `guide/scripts/build_learning_path.py` | 从 manifest 稳定生成 chapter-XX.md 与 course-map.md |
-| Script 9 | `guide/scripts/build_textbook_index.py` | 从 manifest 稳定生成 textbook/index.md |
-| Script 10 | `guide/scripts/validate_learning_path_bundle.py` | 对 unit-manifest、course-map、chapter-XX 做最终一致性校验 |
-| Script 11 | `guide/scripts/validate_teaching_guides_bundle.py` | 对 manifest 对应的 .teaching.md 做最终完整性校验 |
-| Script 12 | `guide/scripts/write_local_claude_settings.py` | 从当前环境安全写入课程本地 Claude 配置，不在终端回显 token |
-| Settings | `guide/.claude/settings.local.json` | Hook 注册配置 |
+| 阶段文件（11 个） | `GUIDE_ROOT/pipeline/stage-{a-k}.md` | 从 guide.md 摘出的各阶段完整执行指令 |
+| Skill | `GUIDE_ROOT/.claude/skills/init-course/SKILL.md` | 课程生成流水线 skill |
+| Command | `GUIDE_ROOT/.claude/commands/init-course.md` | 用户入口命令 |
+| Hook 1 | `GUIDE_ROOT/.claude/hooks/validate-teaching-guide.py` | 校验 .teaching.md 文件结构 |
+| Hook 2 | `GUIDE_ROOT/.claude/hooks/validate-chapter-path.py` | 校验 chapter-XX.md 文件结构 |
+| Hook 3 | `GUIDE_ROOT/.claude/hooks/validate-paragraph-numbering.py` | 校验段落号连续性 |
+| Hook 4 | `GUIDE_ROOT/.claude/hooks/validate-unit-manifest.py` | 校验 unit-manifest.json 与教材标题结构一致 |
+| Hook 5 | `GUIDE_ROOT/.claude/hooks/validate-course-map.py` | 校验 course-map.md 与 manifest 一致 |
+| Hook Wrapper | `GUIDE_ROOT/.claude/hooks/invoke-python-hook.py` | 跨平台以 UTF-8 方式桥接 stdin 到 Python hook |
+| Script 1 | `GUIDE_ROOT/scripts/build_unit_manifest.py` | 从教材章节稳定生成 unit-manifest.json，并为无三级标题的重负荷二级小节确定性拆出虚拟正式课次 |
+| Script 2 | `GUIDE_ROOT/scripts/clean_template_artifacts.py` | 清理/检查正式产物目录中的模板示例文件和阶段 A 预生成样例产物 |
+| Script 3 | `GUIDE_ROOT/scripts/reset_chapter_splits.py` | 阶段 C 拆分前清理旧章节拆分产物 |
+| Script 4 | `GUIDE_ROOT/scripts/build_teaching_batches.py` | 从 manifest 稳定生成阶段 H 小批次计划 |
+| Script 5 | `GUIDE_ROOT/scripts/print_teaching_batch_context.py` | 按 batch_id 输出阶段 H 当前批次的 manifest 与原文上下文 |
+| Script 6 | `GUIDE_ROOT/scripts/stage_h_status.py` | 从 manifest、批次计划和实际文件判断 H 阶段进度与下一批 |
+| Script 7 | `GUIDE_ROOT/scripts/build_teaching_audit_report.py` | 从 manifest 和批次计划稳定生成教学指引审查报告 |
+| Script 8 | `GUIDE_ROOT/scripts/build_learning_path.py` | 从 manifest 稳定生成 chapter-XX.md 与 course-map.md |
+| Script 9 | `GUIDE_ROOT/scripts/build_textbook_index.py` | 从 manifest 稳定生成 textbook/index.md |
+| Script 10 | `GUIDE_ROOT/scripts/validate_learning_path_bundle.py` | 对 unit-manifest、course-map、chapter-XX 做最终一致性校验 |
+| Script 11 | `GUIDE_ROOT/scripts/validate_teaching_guides_bundle.py` | 对 manifest 对应的 .teaching.md 做最终完整性校验 |
+| Script 12 | `GUIDE_ROOT/scripts/write_local_claude_settings.py` | 从当前环境安全写入课程本地 Claude 配置，不在终端回显 token |
+| Settings example | `GUIDE_ROOT/.claude/settings.example.json` | 可提交的 Hook 注册示例 |
+| Local settings | `GUIDE_ROOT/.claude/settings.local.json` | 本机配置，已被 `.gitignore` 忽略 |
 
 ---
 
@@ -181,7 +182,7 @@ AI 教学任意小节前，必须按顺序读取：
 
 ### 第一步：复制模板 + 变量替换
 
-- [ ] 将 `guide/模板course/` 整体复制到课程文件夹
+- [ ] 将 `GUIDE_ROOT/模板course/` 整体复制到课程文件夹
 - [ ] 将所有模板文件中的 `{{VAR}}` 占位符替换为实际变量值
 - [ ] 重命名：去掉所有文件名中的"模板"前缀
 - [ ] 运行 `python -X utf8 scripts/clean_template_artifacts.py COURSE_DIR --initial`，清理 `示例-*` / `模板*` 和模板预生成样例产物
@@ -219,21 +220,21 @@ AI 教学任意小节前，必须按顺序读取：
 
 ### 第六步：生成 Claude Code 封装
 
-- [ ] 生成 `guide/pipeline/stage-a.md` 到 `stage-k.md`（11 个阶段文件）
-- [ ] 生成 `guide/.claude/skills/init-course/SKILL.md`
-- [ ] 生成 `guide/.claude/commands/init-course.md`
-- [ ] 生成 `guide/.claude/hooks/validate-teaching-guide.py`
-- [ ] 生成 `guide/.claude/hooks/validate-chapter-path.py`
-- [ ] 生成 `guide/.claude/hooks/validate-paragraph-numbering.py`
-- [ ] 生成 `guide/.claude/hooks/validate-unit-manifest.py`
-- [ ] 生成 `guide/.claude/hooks/validate-course-map.py`
-- [ ] 生成 `guide/.claude/hooks/invoke-python-hook.py`
-- [ ] 生成 `guide/scripts/build_unit_manifest.py`
-- [ ] 生成 `guide/scripts/reset_chapter_splits.py`
-- [ ] 生成 `guide/scripts/build_teaching_audit_report.py`
-- [ ] 生成 `guide/scripts/build_textbook_index.py`
-- [ ] 生成 `guide/scripts/build_learning_path.py`
-- [ ] 生成 `guide/scripts/validate_learning_path_bundle.py`
-- [ ] 生成 `guide/scripts/validate_teaching_guides_bundle.py`
-- [ ] 生成 `guide/scripts/write_local_claude_settings.py`
-- [ ] 生成 `guide/.claude/settings.local.json`
+- [ ] 生成 `GUIDE_ROOT/pipeline/stage-a.md` 到 `stage-k.md`（11 个阶段文件）
+- [ ] 生成 `GUIDE_ROOT/.claude/skills/init-course/SKILL.md`
+- [ ] 生成 `GUIDE_ROOT/.claude/commands/init-course.md`
+- [ ] 生成 `GUIDE_ROOT/.claude/hooks/validate-teaching-guide.py`
+- [ ] 生成 `GUIDE_ROOT/.claude/hooks/validate-chapter-path.py`
+- [ ] 生成 `GUIDE_ROOT/.claude/hooks/validate-paragraph-numbering.py`
+- [ ] 生成 `GUIDE_ROOT/.claude/hooks/validate-unit-manifest.py`
+- [ ] 生成 `GUIDE_ROOT/.claude/hooks/validate-course-map.py`
+- [ ] 生成 `GUIDE_ROOT/.claude/hooks/invoke-python-hook.py`
+- [ ] 生成 `GUIDE_ROOT/scripts/build_unit_manifest.py`
+- [ ] 生成 `GUIDE_ROOT/scripts/reset_chapter_splits.py`
+- [ ] 生成 `GUIDE_ROOT/scripts/build_teaching_audit_report.py`
+- [ ] 生成 `GUIDE_ROOT/scripts/build_textbook_index.py`
+- [ ] 生成 `GUIDE_ROOT/scripts/build_learning_path.py`
+- [ ] 生成 `GUIDE_ROOT/scripts/validate_learning_path_bundle.py`
+- [ ] 生成 `GUIDE_ROOT/scripts/validate_teaching_guides_bundle.py`
+- [ ] 生成 `GUIDE_ROOT/scripts/write_local_claude_settings.py`
+- [ ] 生成 `GUIDE_ROOT/.claude/settings.example.json`

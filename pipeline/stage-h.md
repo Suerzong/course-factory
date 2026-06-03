@@ -9,7 +9,7 @@
 ## 模板/示例
 
 - 模板文件：`knowledge/teaching-guides/TEMPLATE.md`
-- 示例文件只允许存在于 `guide/模板course/` 源模板中，不得复制到 `COURSE_DIR/knowledge/teaching-guides/chapter-*`
+- 示例文件只允许存在于 `GUIDE_ROOT/模板course/` 源模板中，不得复制到 `COURSE_DIR/knowledge/teaching-guides/chapter-*`
 
 ## 前置检查
 
@@ -340,5 +340,5 @@ python -X utf8 scripts/build_teaching_audit_report.py COURSE_DIR
 完成记录写入后：
 1. 读取 `COURSE_DIR/pipeline-progress.md`
 2. 找到第一个状态为"待执行"的阶段
-3. 如果找到 -> 读取对应的 `guide/pipeline/stage-{x}.md`，执行该阶段
+3. 如果找到 -> 读取对应的 `GUIDE_ROOT/pipeline/stage-{x}.md`，执行该阶段
 4. 如果没有"待执行"阶段 -> 所有阶段完成，进入清理协议

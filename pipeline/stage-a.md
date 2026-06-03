@@ -4,7 +4,7 @@
 
 ## 需要的变量
 
-本阶段需要填写 12 个课程配置变量（从 `guide/init-course.md` 的"课程配置变量"段落读取定义）。
+本阶段需要填写 12 个课程配置变量（从 `GUIDE_ROOT/init-course.md` 的"课程配置变量"段落读取定义）。
 
 ## 前置检查
 
@@ -22,13 +22,13 @@
 
 > **工作目录**：本阶段及后续所有阶段，操作均在 `COURSE_DIR` 内进行。所有相对路径以 `COURSE_DIR` 为根。
 
-> **guide 只读规则**：正式课程生成运行期间，`C:\Users\sez18\Desktop\guide` 只允许读取，不得修改其中任何 `scripts/`、`.claude/hooks/`、`pipeline/`、模板或文档文件。若 guide 脚本、hook 或 validator 失败，必须停止并报告，等待 Codex 在单独修复回合中修改 skill；不得在生产运行中现场修脚本后继续。
+> **guide 只读规则**：正式课程生成运行期间，`GUIDE_ROOT/` 只允许读取，不得修改其中任何 `scripts/`、`.claude/hooks/`、`pipeline/`、模板或文档文件。若 guide 脚本、hook 或 validator 失败，必须停止并报告，等待维护者在单独修复回合中修改 skill；不得在生产运行中现场修脚本后继续。
 
 ### 模板复制与变量替换
 
 用户确认变量后，立即执行：
 
-1. **复制模板目录**：将 `guide/模板course/` 整体复制到素材文件夹中，并由 AI 根据课程名（`COURSE_NAME`）重命名文件夹。例如 `COURSE_NAME` 为"神经网络与深度学习"，则文件夹命名为 `神经网络与深度学习/`。此文件夹即为 `COURSE_DIR`，后续所有阶段在此目录内操作。
+1. **复制模板目录**：将 `GUIDE_ROOT/模板course/` 整体复制到素材文件夹中，并由 AI 根据课程名（`COURSE_NAME`）重命名文件夹。例如 `COURSE_NAME` 为"神经网络与深度学习"，则文件夹命名为 `神经网络与深度学习/`。此文件夹即为 `COURSE_DIR`，后续所有阶段在此目录内操作。
 
 2. **变量替换**：遍历 `COURSE_DIR` 中所有从模板复制来的文件，将模板中的 `{{VAR}}` 占位符替换为实际变量值。
 
@@ -37,7 +37,7 @@
 4. **模板示例清理规则**：正式课程目录中不得保留模板示例文件。完成复制、变量替换和重命名后，立即运行：
    - `python -X utf8 scripts/clean_template_artifacts.py COURSE_DIR --initial`
    - 该脚本会删除生产目录中的 `示例-*`、`模板*` 文件，以及模板预生成的章节拆分、示例图片、示例 `.teaching.md`、示例 manifest / course-map / chapter path
-   - 示例内容只允许保留在 `guide/模板course/` 源模板中，不进入 `COURSE_DIR`
+   - 示例内容只允许保留在 `GUIDE_ROOT/模板course/` 源模板中，不进入 `COURSE_DIR`
 
 5. **核验**：替换完成后，扫描所有已替换文件，确认无残留 `{{` 或 `}}` 占位符。
 
@@ -95,5 +95,5 @@
 完成记录写入后：
 1. 读取 `COURSE_DIR/pipeline-progress.md`
 2. 找到第一个状态为"待执行"的阶段
-3. 如果找到 -> 读取对应的 `guide/pipeline/stage-{x}.md`，执行该阶段
+3. 如果找到 -> 读取对应的 `GUIDE_ROOT/pipeline/stage-{x}.md`，执行该阶段
 4. 如果没有"待执行"阶段 -> 所有阶段完成，进入清理协议

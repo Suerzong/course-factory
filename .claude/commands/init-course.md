@@ -7,6 +7,8 @@ argument-hint: <课程文件夹路径>
 
 用户提供的课程文件夹路径：`$ARGUMENTS`
 
+路径约定：`GUIDE_ROOT` 指当前仓库根目录，也就是包含 `init-course.md`、`pipeline/`、`scripts/` 和 `模板course/` 的目录。
+
 ## 执行步骤
 
 1. 先询问运行模式：
@@ -20,11 +22,11 @@ argument-hint: <课程文件夹路径>
    - 不得在普通回复、执行日志、进度文件或审查报告中回显密钥/token；只允许显示 `已提供` 或掩码摘要
 4. 扫描素材文件夹，自动识别输入文件（`*.md`、`img/` 或 `images/`、`*.pdf`）
 5. `interactive` 模式下展示识别结果并确认；`batch` 模式下识别唯一则自动继续
-6. 读取 `guide/init-course.md` 的"课程配置变量"段落，AI 读教材自动填写 12 个变量
+6. 读取 `GUIDE_ROOT/init-course.md` 的"课程配置变量"段落，AI 读教材自动填写 12 个变量
 7. `interactive` 模式下展示变量供用户确认；`batch` 模式下只在阻断性歧义时停下
 8. 进入阶段 A（复制模板、创建 `COURSE_DIR`、写入本次本地模型配置、生成进度文件）
-9. 正式运行期间 `guide/` 目录只读；不得修改 `guide/scripts`、`guide/.claude/hooks`、`guide/pipeline`、模板或文档。若脚本/validator 失败，停止并报告，不得现场改 guide 后继续跑
-10. 按 `guide/pipeline/stage-a.md` 到 `stage-k.md` 逐阶段执行，每阶段完成后读进度文件找下一阶段
+9. 正式运行期间 `GUIDE_ROOT/` 只读；不得修改 `GUIDE_ROOT/scripts`、`GUIDE_ROOT/.claude/hooks`、`GUIDE_ROOT/pipeline`、模板或文档。若脚本/validator 失败，停止并报告，不得现场改仓库文件后继续跑
+10. 按 `GUIDE_ROOT/pipeline/stage-a.md` 到 `stage-k.md` 逐阶段执行，每阶段完成后读进度文件找下一阶段
 11. 阶段 A 写入本地模型配置时不得用 Write/Edit 回显 token，必须运行 `python -X utf8 scripts/write_local_claude_settings.py COURSE_DIR`
 12. 阶段 A 复制模板后、复制用户素材前必须运行 `python -X utf8 scripts/clean_template_artifacts.py COURSE_DIR --initial`，清掉模板预生成章节、示例教学文件和示例 manifest
 13. 阶段 A 完成前必须运行 `python -X utf8 scripts/clean_template_artifacts.py COURSE_DIR --check`，确保模板示例未进入正式产物

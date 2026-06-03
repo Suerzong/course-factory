@@ -1,0 +1,31 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -X utf8 .claude/hooks/invoke-python-hook.py .claude/hooks/validate-teaching-guide.py"
+          },
+          {
+            "type": "command",
+            "command": "python -X utf8 .claude/hooks/invoke-python-hook.py .claude/hooks/validate-chapter-path.py"
+          },
+          {
+            "type": "command",
+            "command": "python -X utf8 .claude/hooks/invoke-python-hook.py .claude/hooks/validate-course-map.py"
+          },
+          {
+            "type": "command",
+            "command": "python -X utf8 .claude/hooks/invoke-python-hook.py .claude/hooks/validate-paragraph-numbering.py"
+          },
+          {
+            "type": "command",
+            "command": "python -X utf8 .claude/hooks/invoke-python-hook.py .claude/hooks/validate-unit-manifest.py"
+          }
+        ]
+      }
+    ]
+  }
+}
