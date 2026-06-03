@@ -15,28 +15,33 @@
 
 ## 执行指令
 
-1. **确认图片位置**：阶段 A 已将素材文件夹中的 img/ 复制到 `textbook/chapters/img/`，图片已就位
-2. **扫描图片引用**：查找每个章节 Markdown 文件中的图片引用（`![](img/...)`、`![](./img/...)` 等各种写法）
+1. **确认图片位置**：阶段 A 已将素材文件夹中的 `img/` 或 `images/` 统一复制到 `textbook/chapters/images/`，图片已就位。若发现历史残留 `textbook/chapters/img/`，先迁移其中图片到 `images/` 并删除空的 `img/` 目录。
+2. **扫描图片引用**：查找每个章节 Markdown 文件中的图片引用（`![](images/...)`、`![](./images/...)`、`![](img/...)`、`![](./img/...)` 等各种写法）
 3. **重命名图片**：统一命名为 `chXX-YY-ZZZ` 格式
    - `ch` = 固定前缀
    - `XX` = 章序号（两位数，与文件名中的序号一致）
    - `YY` = 节序号（两位数，按该章内 `##` 二级标题的出现顺序编号；`00` 预留给章引言部分，即第一个 `##` 标题之前出现的图片）
    - `ZZZ` = 该节内图片序号（三位数，从 001 起递增）
-4. **更新引用**：同步更新 Markdown 文件中的图片引用路径
+4. **更新引用**：同步更新 Markdown 文件中的图片引用路径，最终只允许 `images/...`
+5. **归一化兜底**：完成重命名后必须运行：
+   - `python -X utf8 scripts/normalize_image_refs.py COURSE_DIR`
+   - `python -X utf8 scripts/normalize_image_refs.py COURSE_DIR --check`
 
 示例：
 ```text
 原始：![](img/Figure7.4.png)
 重命名后文件：ch07-04-002.png
-更新引用：![](img/ch07-04-002.png)
+更新引用：![](images/ch07-04-002.png)
 ```
 
 ## 质量门
 
-- `textbook/chapters/img/` 目录存在
+- `textbook/chapters/images/` 目录存在
+- `textbook/chapters/img/` 目录不存在
 - 所有图片文件名匹配 `chXX-YY-ZZZ.*` 格式
 - Markdown 文件中无残留的旧图片引用路径
-- 图片引用路径已全部更新为新格式
+- 图片引用路径已全部更新为 `images/...`
+- `python -X utf8 scripts/normalize_image_refs.py COURSE_DIR --check` 返回 0
 
 ## 完成记录
 

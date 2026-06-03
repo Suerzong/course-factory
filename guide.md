@@ -27,7 +27,7 @@
 - **Claude Code skill 模式**：上层 Agent 是 Claude Code，以 skill 形式交付
 - **Codex skill 模式**：上层 Agent 是 Codex，以可调用技能形式交付
 
-模型配置（API key、base_url、model_id）由用户在使用时指定，仅在单次任务中生效。
+模型配置（API key、base_url、model_id）由用户在每次启动 skill 时重新指定，仅在单次任务中生效；密钥只写入课程目录下的本地配置文件，不写入进度状态文件、执行日志、审查报告，也不得在普通回复中明文回显。
 
 ---
 
@@ -51,13 +51,13 @@ course-root/
 │   ├── index.md                       # 教材总目录（文件导航表 + 段落路由表）
 │   ├── 神经网络与深度学习.md           # 教材总 Markdown（原样保留，不修改）
 │   ├── chapters/                      # 按章拆分的 Markdown 教材
-│   │   ├── 00-序前言符号表.md
+│   │   ├── 00-书目信息.md
 │   │   ├── 01-第1章-绪论.md
 │   │   ├── 02-第2章-机器学习概述.md
 │   │   ├── ...
 │   │   ├── 15-第15章-序列生成模型.md
-│   │   ├── 16-附录-数学基础.md
-│   │   └── img/                       # 全部教材配图（重命名后）
+│   │   ├── appendix-A-数学基础.md
+│   │   └── images/                    # 全部教材配图（重命名后）
 │   │       ├── ch01-00-001.jpg ~ ch01-08-003.jpg
 │   │       ├── ch02-*.jpg ~ ch15-*.jpg
 │   │       └── appendix-001.jpg ~ appendix-013.jpg
@@ -70,12 +70,12 @@ course-root/
 │       ├── README.md
 │       ├── TEMPLATE.md                # 教学指南模板
 │       ├── chapter-01/                # 第1章（17 个教学单元）
-│       │   ├── 01-00-introduction.teaching.md
-│       │   ├── 01-01-artificial-intelligence.teaching.md
-│       │   ├── 01-01-01-ai-history.teaching.md
-│       │   ├── 01-01-02-ai-schools.teaching.md
+│       │   ├── 00-introduction.teaching.md
+│       │   ├── 01-intro.teaching.md
+│       │   ├── 01-01.teaching.md
+│       │   ├── 01-02.teaching.md
 │       │   ├── ...
-│       │   └── 01-08-summary-and-reading.teaching.md
+│       │   └── 08-intro.teaching.md
 │       ├── chapter-02/
 │       ├── ...
 │       └── chapter-15/
@@ -113,7 +113,7 @@ course-root/
 | 层级 | 目录 | 职责 | 文件命名模式 |
 |---|---|---|---|
 | 教材层 | `textbook/` | 原始教材内容，按章拆分 + 配图 + PDF | `XX-第X章-{标题}.md` |
-| 教学层 | `knowledge/teaching-guides/` | 细粒度教学指南，每个文件一个教学单元 | `chapter-XX/{XX}-{节}[-{考点}]-{考点名}.teaching.md` |
+| 教学层 | `knowledge/teaching-guides/` | 细粒度教学指南，每个文件一个教学单元 | `chapter-XX/00-introduction.teaching.md`、`chapter-XX/XX-intro.teaching.md`、`chapter-XX/XX-YY.teaching.md` |
 | 路径层 | `learning-path/` | 学习顺序规划与课程地图 | `chapter-XX.md`、`course-map.md` |
 | 练习层 | `practice/` | 出题规则、诊断流程模板 | `task-generation-rules.md`、`daily-diagnostics.md` |
 | 进度层 | `progress/` | 当前位置与掌握度追踪 | `current-position.md`、`mastery-tracker.md` |
@@ -126,8 +126,7 @@ course-root/
 | 类别 | 命名模式 | 示例 |
 |---|---|---|
 | 章节文件 | `XX-第X章-{标题}.md` | `01-第1章-绪论.md` |
-| 教学单元 | `{章}-{节}[-{考点}]-{考点名}.teaching.md` | `01-01-01-ai-history.teaching.md` |
-| 教学单元（中文考点名） | 同上，考点名用中文 | `02-04-01-惯性系.teaching.md` |
+| 教学单元 | `00-introduction.teaching.md / XX-intro.teaching.md / XX-YY.teaching.md` | `00-introduction.teaching.md`、`01-intro.teaching.md`、`01-01.teaching.md` |
 | 图片 | `ch{XX}-{节}[-{考点}]-{序号}.jpg` | `ch07-04-002.jpg` |
 | 学习路径 | `chapter-{XX}.md` | `chapter-01.md` |
 | 学习日志 | `{YYYY-MM-DD}-ch{XX}-{单元}.md` | `2026-05-23-ch01-00.md` |
@@ -265,9 +264,25 @@ guide/
 │   │   └── init-course/
 │   │       └── SKILL.md                   # 课程生成流水线 skill
 │   ├── hooks/
-│   │   ├── validate-teaching-guide.sh     # 校验 .teaching.md 文件结构
-│   │   ├── validate-chapter-path.sh       # 校验 chapter-XX.md 文件结构
-│   │   └── validate-paragraph-numbering.sh # 校验段落号连续性
+│   │   ├── validate-teaching-guide.py      # 校验 .teaching.md 文件结构
+│   │   ├── validate-chapter-path.py        # 校验 chapter-XX.md 文件结构
+│   │   ├── validate-course-map.py          # 校验 course-map.md 与 manifest 一致
+│   │   ├── validate-paragraph-numbering.py # 校验段落号连续性
+│   │   ├── validate-unit-manifest.py       # 校验 unit-manifest.json 真源闭合
+│   │   └── invoke-python-hook.py           # 跨平台 UTF-8 hook 包装器
+│   ├── scripts/
+│   │   ├── build_unit_manifest.py          # 从教材章节稳定生成 unit-manifest.json
+│   │   ├── clean_template_artifacts.py     # 清理/检查正式目录中的模板示例文件
+│   │   ├── reset_chapter_splits.py         # 阶段 C 前清理旧章节拆分产物
+│   │   ├── build_teaching_batches.py       # 从 manifest 生成阶段 H 小批次计划
+│   │   ├── print_teaching_batch_context.py # 按 batch_id 输出阶段 H 当前批次上下文
+│   │   ├── stage_h_status.py               # 判断阶段 H 进度和下一批
+│   │   ├── build_learning_path.py          # 从 manifest 稳定生成 chapter-XX.md / course-map.md
+│   │   ├── validate_learning_path_bundle.py # 最终校验 unit-manifest / course-map / chapter-XX 一致性
+│   │   ├── validate_teaching_guides_bundle.py # 最终校验 manifest 对应的教学指引完整性
+│   │   ├── normalize_image_refs.py     # 统一图片目录与引用到 images/
+│   │   ├── validate_course_quality.py  # 最终课程质量门
+│   │   └── build_pipeline_diagnostics.py   # 生成脱敏流水线诊断报告
 │   └── commands/
 │       └── init-course.md                 # 用户入口命令
 ├── guide.md                               # 完整参考文档（不修改）
@@ -280,10 +295,12 @@ guide/
 ```text
 用户：/project:init-course <课程文件夹路径>
 ↓
-1. 询问模型配置（api_key, base_url, model_id）
-2. 扫描课程文件夹，自动识别 Markdown/img/PDF
-3. 读取 init-course.md 变量表，AI 读教材自动填写 12 个变量，用户确认
-4. 生成 pipeline-progress.md（状态机文件）
+1. 询问运行模式（interactive / batch）
+2. 询问本次运行的模型 JSON（api_key, base_url, model_id），展示摘要时必须掩码密钥
+3. 扫描课程文件夹，自动识别 Markdown/图片目录/PDF
+4. 读取 init-course.md 变量表，AI 读教材自动填写 12 个变量
+5. interactive 模式下逐步确认；batch 模式下只在阻断性歧义时停下
+6. 生成 pipeline-progress.md（状态机文件）并通过稳定脚本写入本地模型配置文件
 ↓
 逐阶段执行（A → B → C → ... → K）：
   每个阶段：
@@ -292,13 +309,15 @@ guide/
     3. 严格按指令执行
     4. 质量门检查（Hook 自动校验 + 自校验）
     5. 通过 → 更新进度 → 进入下一阶段
-    6. 不通过 → 修正 → 重试
+    6. 不通过 → 修正 → 重试；若 guide 脚本/hook/validator 自身失败，则停止报告，不在生产运行中修改 guide
 ↓
 全部完成：
   1. 删除 pipeline-progress.md
-  2. 删除临时文件
-  3. 确认 guide/ 未被修改
-  4. 输出完成报告
+  2. 删除 settings.local.json
+  3. 如果 `.claude/` 删除配置后为空，则删除空目录
+  4. 删除临时文件
+  5. 确认 guide/ 未被修改
+  6. 输出完成报告
 ```
 
 ### 阶段 H 双 Agent 映射
@@ -328,6 +347,7 @@ guide/
 - 完成后更新为"已完成"
 - 只有当前阶段"已完成"才能进入下一阶段
 - 支持中断恢复
+- 只记录运行模式和模型摘要，不记录或回显密钥/token
 
 ---
 
@@ -405,11 +425,12 @@ guide/
 **结构**：
 - `index.md`：教材索引，包含文件导航表（文件名、标题、段落数、图片数）和段落路由表
 - `chapters/`：每章一个 Markdown 文件，正文用 `¶XXXX` 段落号标注
-- `chapters/img/`：教材图片
+- `chapters/images/`：教材图片
 - `pdf/`：教材 PDF 原文
 
 **段落号系统**：
 - 每个正文段落用 `[¶XXXX]` 标注（如 `[¶0001]`、`[¶0042]`）
+- 段落号必须放在内容行行首，格式为 `[¶XXXX] 正文/图片/公式/脚注/参考文献`；不得放在行尾或句中
 - 标题行不占用段落号
 - 所有引用（教学指引、练习规格、学习日志）都指向段落号
 
@@ -432,6 +453,7 @@ guide/
 
 ## 原文定位
 - 教材索引、原文文件、标题、正文范围、公式密集度、是否需要核对 PDF
+- 文件内全部 `¶XXXX` / `¶XXXX-¶XXXX` 引用都必须落在本文件正文范围内，不得引用相邻单元或后续小节
 
 ## 本节教学目标
 - 学完后应该能够...
@@ -493,7 +515,7 @@ guide/
 - 章测通过后才进入下一章
 
 **复刻要点**：
-- 单元粒度可以灵活：大的小节可以拆成多个单元，小的可以合并
+- 单元粒度由 `unit-manifest.json` 固定：每章生成 `00-introduction`，每个 `##` 生成 `XX-intro`，每个 `###` 生成 `XX-YY`
 - 单元ID 必须全局唯一，且在 mastery-tracker、learning-sessions 中保持一致
 
 ### 3.7 进度层（progress/）
@@ -808,38 +830,45 @@ Claude 读取 Markdown 文件，识别章节结构：
 
 按一级标题拆分为独立 Markdown 文件：
 
-- **命名规范**：`XX-章节标题.md`，其中 `XX` 为两位数序号（`00`、`01`、`02`...）
+- **先清理旧拆分产物**：拆分前必须运行 `python -X utf8 scripts/reset_chapter_splits.py COURSE_DIR`，只保留 `总教材.md` 和图片目录，删除旧的 `00-*.md` / `XX-*.md` 拆分文件
+- **命名规范**：正式章节使用 `XX-章节标题.md`，其中 `XX` 为两位数章号（`01`、`02`...），必须与 H1 的 `第N章` 一致
 - **标题来源**：直接从 Markdown 中读取的一级标题原文提取，不硬编码。有的教材有"序""前言""符号表"，有的直接从"第1章"开始，按实际结构来
+- **封面头部材料特判**：如果教材开头只有书名、作者、出版社等书目信息，没有真正的一级标题正文，则固定命名为 `00-书目信息.md`
+- **正式章节必须 1-based 命名**：`第1章` 固定命名为 `01-第1章-标题.md`，`第2章` 固定命名为 `02-第2章-标题.md`。`00-` 只允许用于 `00-书目信息.md`，不得把第1章命名为 `00-第1章...md`
+- **非教学材料不得使用数字章节前缀**：附录、习题答案、参考资料等不进入 manifest 的材料必须使用非数字前缀，例如 `appendix-A-标题.md`、`appendix-B-标题.md`、`exercise-answers.md`
 - **文件位置**：所有文件放入 `textbook/chapters/`（包括总 Markdown 和分割后的各章文件）
 - **总 Markdown**：原样保留在 `textbook/chapters/` 中不修改，分割出的各章是独立副本
 
-示例（假设教材有"序"和 15 章）：
+示例（假设教材开头有书目信息，后面有 15 章）：
 ```text
 textbook/chapters/
 ├── 总教材.md              ← 原始总文件，不修改
-├── 00-序.md
+├── 00-书目信息.md
 ├── 01-第1章-绪论.md
 ├── 02-第2章-机器学习概述.md
 ├── ...
-└── 15-第15章-序列生成模型.md
+├── 15-第15章-序列生成模型.md
+├── appendix-A-附录标题.md
+└── exercise-answers.md
 ```
 
 ### 阶段 D：图片迁移与重命名
 
-1. **移动 img 文件夹**：将用户提供的 img 文件夹移动到 `textbook/chapters/img/`
-2. **扫描图片引用**：查找每个小 Markdown 文件中的图片引用（`![](img/...)`、`![](./img/...)` 等各种写法）
+1. **移动图片文件夹**：将用户提供的 `img/` 或 `images/` 文件夹统一移动到 `textbook/chapters/images/`
+2. **扫描图片引用**：查找每个小 Markdown 文件中的图片引用（`![](images/...)`、`![](./images/...)`、`![](img/...)`、`![](./img/...)` 等各种写法）
 3. **重命名图片**：统一命名为 `chXX-YY-ZZZ` 格式
    - `ch` = 固定前缀
    - `XX` = 章序号（两位数，与文件名中的序号一致）
    - `YY` = 节序号（两位数，按该章内 `##` 二级标题的出现顺序编号）
    - `ZZZ` = 该节内图片序号（三位数，从 001 起递增）
-4. **更新引用**：同步更新 Markdown 文件中的图片引用路径
+4. **更新引用**：同步更新 Markdown 文件中的图片引用路径，最终只允许 `images/...`
+5. **归一化校验**：运行 `python -X utf8 scripts/normalize_image_refs.py COURSE_DIR` 和 `python -X utf8 scripts/normalize_image_refs.py COURSE_DIR --check`
 
 示例：
 ```text
 原始：![](img/Figure7.4.png)
 重命名后文件：ch07-04-002.png
-更新引用：![](img/ch07-04-002.png)
+更新引用：![](images/ch07-04-002.png)
 ```
 
 ### 阶段 E：段落号标注
@@ -849,7 +878,7 @@ textbook/chapters/
 **标记格式**：`[¶XXXX]`，固定前缀 `[¶]` + 4 位数字，零填充（如 0001、0042、0206）
 
 **编号策略**：
-- 从 0001 起，全文连续递增，无跳号
+- 每章独立编号，从 0001 起，章内连续递增，无跳号，跨章重置
 - 每个独立内容单元占一个编号：一个段落、一个公式块、一张图、一条脚注、一条参考文献
 
 **不编号的元素**：
@@ -857,7 +886,7 @@ textbook/chapters/
 - 章节标题使用自身的层级编号体系（如 9.1、9.1.2.1）
 
 **与其他编号体系的关系**：
-- `[¶]` 段落序号是全局定位标记，与内容内部的公式编号 `(9.X)`、图表编号 `图X.X` 互不耦合
+- `[¶]` 段落序号是章内定位标记，必须和章节文件路径一起使用；它与内容内部的公式编号 `(9.X)`、图表编号 `图X.X` 互不耦合
 - 三套编号各司其职：`[¶]` 定位段落、`(9.X)` 定位公式、`图X.X` 定位图表
 
 **典型标注对象**：
@@ -866,7 +895,7 @@ textbook/chapters/
 |---|---|
 | 正文段落 | `[¶0004]` 无监督学习是指…… |
 | 公式块 | `[¶0016]` 后接 `$$...$$` |
-| 图片块 | `[¶0014]` 后接 `![](img/...)` |
+| 图片块 | `[¶0014]` 后接 `![](images/...)` |
 | 脚注/注释 | `[¶0002]` 这里数字是指…… |
 | 习题 | `[¶0191]` 习题9-1 …… |
 | 参考文献 | `[¶0198]` 周志华, 2016. …… |
@@ -899,167 +928,122 @@ textbook/chapters/
 
 3. **使用规则**：说明段落号的引用方式和标题行不占段落号的约定。
 
+阶段 G 必须运行 `python -X utf8 scripts/build_textbook_index.py COURSE_DIR` 生成索引；章节列表只以 `learning-path/unit-manifest.json` 为准，`00-书目信息.md` 和 `总教材.md` 不计入教材章节。
+
 ### 阶段 H：教学指引生成
 
 进入 `knowledge/teaching-guides/`，为每个章节创建教学指引文件。
 
-**核心原则**：一个 `.teaching.md` 文件 = 教材的一个**最小子节**（即没有下级标题的那一层）。
+**核心原则**：阶段 H 不再现场自由切分，而是严格消费 `learning-path/unit-manifest.json`。
 
-**执行流程**：采用**分批生成 + 上位审查**模式，每批 3 章，逐批推进。
+**固定切分规则**：
+- 每章固定生成 `00-introduction.teaching.md`
+- 每个 `##` 固定生成 `XX-intro.teaching.md`
+- 每个 `###` 或阶段 E 对重负荷 `##` 的虚拟拆分，固定生成 `XX-YY.teaching.md`
+- `####` 及以下全部并入父级 `###`
+- 文件名只保留纯编号，不带英文或中文 slug
+- 阶段 H 不重新拆课次；是否存在 `XX-YY.teaching.md` 只以 `learning-path/unit-manifest.json` 为准
 
-```text
-┌──────────────────────────────────────────────────────────────┐
-│  上位 Agent（调度层）                                         │
-│  ─ 将教材章节分批，每批 3 章（末尾不足 3 章则全部发送）       │
-│  ─ 组装 prompt：教材原文 + TEMPLATE.md + 命名规范 + 决策树    │
-│  ─ 发送给下位 Claude                                          │
-└──────────────────────────┬──────────────────────────────────┘
-                           ▼
-┌──────────────────────────────────────────────────────────────┐
-│  下位 Claude（执行层）                                        │
-│  ─ 通读每章教材原文                                           │
-│  ─ 识别最小单元，生成 .teaching.md 文件                       │
-│  ─ 按 TEMPLATE.md 填充个性化内容                              │
-│  ─ 返回本批结果                                               │
-└──────────────────────────┬──────────────────────────────────┘
-                           ▼
-┌──────────────────────────────────────────────────────────────┐
-│  上位 Agent 审查                                              │
-│  ─ 逐份对照教材原文，检查：                                   │
-│    ① 知识点分层是否合理（核心/重要/了解 是否归对层级）       │
-│    ② 讲解要求是否准确（是否遗漏关键点或过度展开）            │
-│    ③ 出题权限是否正确（正式题/课堂识别/否 是否匹配）         │
-│    ④ 原文依据是否精确（段落号是否对应、内容是否忠实）        │
-│  ─ 给出综合评分（满分 100）                                   │
-└──────────────────────────┬──────────────────────────────────┘
-                           ▼
-                    评分 ≥ 95? ──是──→ 通过，进入下一批
-                           │否
-                           ▼
-                    ┌──────────────────┐
-                    │ 告知下位模型：    │
-                    │ ① 具体错误点     │
-                    │ ② 对应文件和段落 │
-                    │ ③ 修正方向       │
-                    └────────┬─────────┘
-                             ▼
-                    下位 Claude 修正 → 重新提交 → 上位再审
-                    （循环直到评分 ≥ 95）
-```
+**执行流程**：采用**动态分批 + 上位硬审查**模式。
+- 阶段 H 必须先运行 `python -X utf8 scripts/build_teaching_batches.py COURSE_DIR --chapters-per-batch 3`
+- 批次按 `learning-path/teaching-batches.json` 连续推进，每个上位批次最多 3 个 `chapter-XX/` 文件夹
+- 默认 16 章课程约 6 个上位批次，不得按 3 个小 `.teaching.md` 文件切批
+- 每个上位批次必须先一次性并行启动本批全部下位 Agent，每个 Agent 负责 1 个章节文件夹
+- 本批全部 Agent 启动前不得等待、不得运行下一次 `stage_h_status.py`、不得把单章完成称为批次完成
+- 当前章节任务上下文必须由 `python -X utf8 scripts/print_teaching_batch_context.py COURSE_DIR H-XXX --chapter-id chapter-YY` 输出
+- 每批全部章节完成并审查通过后，必须运行 `python -X utf8 scripts/stage_h_status.py COURSE_DIR` 判断下一批
+- 下位 Agent 只接收自己章节的 manifest 条目和 `chapter_file` 路径；上位 prompt 不接收整章正文、全量 manifest 或其他批次内容
+- 阶段 H 对 manifest 中任一超重单元仍保持一个 `.teaching.md`；无 `###` 的重负荷 `##` 应已在阶段 E 被拆成虚拟 `lesson`
 
-**分批规则**：
-- 每批 3 章（如 chapter-01 ~ chapter-03）
-- 末尾不足 3 章时全部发送（如剩 2 章则一批完成）
-- 全部章节通过后，阶段 H 结束
+**放行机制**：不再使用 `95` 分阈值，改成固定硬性审查表。
 
-**审查评分标准**：
-
-| 维度 | 权重 | 评分要点 |
-|---|---|---|
-| 知识点分层 | 30% | 核心/重要/了解 是否归对层级，有无把"了解即可"升格为核心 |
-| 讲解要求 | 25% | 是否覆盖该单元的关键定义、公式、模型；有无遗漏或过度展开 |
-| 出题权限 | 20% | 正式题/课堂识别不计分/否 是否与知识点层级匹配 |
-| 原文依据 | 25% | 段落号是否精确对应教材，内容是否忠实于原文而非凭空编写 |
-
-**打回修正规则**：
-- 上位 Agent 必须指出具体错误点（哪个文件、哪个字段、错在哪里）
-- 给出修正方向（如"该知识点应从核心降为重要背景，因为教材仅一句话带过"）
-- 下位 Claude 只修正被指出的问题，不改动已通过的部分
-- 修正后重新提交，上位再次审查，直到评分 ≥ 95
-
-**决策树 — 是否需要拆文件**：
-
-```text
-该标题下面有下级标题（### 或 ####）？
-├── 有 → 不拆，等子标题各自独立成文件
-└── 没有 → 这就是最小单元，生成一个 .teaching.md
-```
-
-**文件命名公式**：
-```
-{章}-{节}[-{子节}[-{子子节}]]-{英文名}.teaching.md
-```
-
-每一级数字对应教材标题的层级：
-
-| 教材标题层级 | 对应编号段 | 说明 |
-|---|---|---|
-| `# 第X章` | `XX-` | 两位数，从 01 起 |
-| `## X.Y 标题` | `XX-YY-` | 两位数，`00` = 章引言，`01` = 第一节 |
-| `### X.Y.Z 标题` | `XX-YY-ZZ-` | 两位数，仅当该节有 `###` 子标题时才加 |
-| `#### X.Y.Z.W 标题` | `XX-YY-ZZ-WW-` | 同理，仅当有 `####` 时才加 |
-
-**示例 — 教材结构与生成文件的映射**：
-
-教材结构：
-```text
-# 第3章 线性模型
-## 3.1 线性判别函数          ← 有 ### 子标题，不单独成文件
-  ### 3.1.1 二分类           ← 无下级标题，最小单元
-  ### 3.1.2 多分类           ← 无下级标题，最小单元
-## 3.4 感知器                ← 有 ### 子标题，不单独成文件
-  ### 3.4.1 参数学习         ← 无下级标题，最小单元
-  ### 3.4.4 扩展到多分类     ← 有 #### 子标题，不单独成文件
-    #### 3.4.4.1 广义感知器收敛 ← 无下级标题，最小单元
-```
-
-生成的文件：
-```text
-knowledge/teaching-guides/chapter-03/
-├── 03-00-introduction.teaching.md                        ← 章引言
-├── 03-01-01-binary-classification.teaching.md            ← §3.1.1
-├── 03-01-02-multi-class-classification.teaching.md       ← §3.1.2
-├── 03-04-01-perceptron-parameter-learning.teaching.md    ← §3.4.1
-├── 03-04-04-01-generalized-perceptron-convergence.teaching.md  ← §3.4.4.1
-└── ...
-```
-
-更多示例：
-```text
-knowledge/teaching-guides/chapter-01/
-├── 01-00-introduction.teaching.md          ← §引言（无 ### 子单元）
-├── 01-01-artificial-intelligence.teaching.md  ← §1.1（无 ### 子单元）
-├── 01-01-01-ai-history.teaching.md         ← §1.1.1
-├── 01-01-02-ai-schools.teaching.md         ← §1.1.2
-└── ...
-
-knowledge/teaching-guides/chapter-02/
-├── 02-00-introduction.teaching.md
-├── 02-01-01-basic-concepts.teaching.md     ← 英文名示例
-├── 02-04-01-惯性系.teaching.md             ← 中文名示例（保持与教材术语一致）
-└── ...
-```
-
-**个性化内容填充规则**：
-
-每个 `.teaching.md` 文件按 TEMPLATE.md 模板填写，内容从该单元对应的教材段落中提取：
-
-| 模板字段 | 内容来源 |
+| 审查项 | 通过标准 |
 |---|---|
-| 原文定位 | 从教材中定位该单元的起止段落号 |
-| 本节教学目标 | 根据教材内容推断学完后应能做什么 |
-| 核心知识点 | 教材中定义、公式、模型、算法等必须掌握的内容 |
-| 重要背景 | 帮助理解核心知识点但不做深推导的内容 |
-| 了解即可 | 教材中提及但不要求深入的内容（人名、年份、工具名等） |
-| 出题权限 | 核心知识点→正式题；重要背景→课堂识别不计分；了解即可→否 |
-| 本节不要求 | 明确该单元不涉及的后文内容、外部资料、代码实现等 |
-| 覆盖检查模板 | 根据教学目标生成 checklist |
+| 单元切分 | 文件名、单元类型、段落范围与 manifest 一致 |
+| 知识点分层 | 核心/背景/了解 划分合理，无重要点遗漏 |
+| 出题边界 | 正式题只覆盖当前单元真正重要且已展开的点 |
+| 学习体验 | 先修提醒、30秒直觉版、常见误解、退出标准、教学轮次都写得实 |
+| 原文忠实 | 段落号对应正确，所有段落引用都落在本单元正文范围内，讲解要求不凭空编写 |
 
-**关键原则**：
-- 每个教学指引必须指向教材段落号（`¶XXXX`），不能凭空编写
-- 核心知识点的 `出题权限` 只能填 `正式题`、`课堂识别不计分`、`否`
-- 不要把后文章节的内容提前纳入当前单元的核心知识点
-- 考点名可以是中文（如 `02-04-01-惯性系.teaching.md`），保持与教材术语一致
+**教学质量硬规则**：
+- `正式题` 只允许落在 manifest `kind=lesson` 的 `正式课次`；`章引言` 和 `单元概述` 不得设置正式题
+- 每个 `正式课次` 至少需要 1 个核心知识点标为 `正式题`
+- 如果最终 manifest 中 `lesson` 数量为 0、教学指引中 `正式题` 数量为 0，或存在未拆分的重负荷 `section-overview`，阶段 K 必须失败
+- 教学目标必须可观察、可检查，不得只写“理解/掌握/了解/熟悉”
+- `30秒直觉版` 必须给出本节要解决的真实疑问和直觉抓手，不得只复述标题
+- `教学轮次` 必须写具体 `¶XXXX` / `¶XXXX-¶XXXX` 覆盖范围和可执行的结束检查
+- `原文依据` 不得写“覆盖段落、对应段落、相关段落、见教材、见原文”等套话
+
+**高负荷课次规则**：
+- 阶段 H 内知识点多时不再拆文件；课次拆分只允许由阶段 E 的 manifest 决定
+- 仍保持一个 `.teaching.md`
+- 但必须加入 `## 教学轮次`
+- `核心知识点` 始终只保留 `3-5` 个高层掌握点
+
+**模板必填块**：
+- 原文定位
+- 先修提醒
+- 30秒直觉版
+- 本节教学目标
+- 知识点分层
+- 教学轮次
+- 常见误解
+- 本节不要求
+- 本节退出标准
+- 覆盖检查模板
+
+### 阶段 H.5：脚本化学习路径真源
+
+`learning-path/unit-manifest.json` 不再由模型手写，而是由脚本稳定生成：
+
+```text
+python -X utf8 scripts/build_unit_manifest.py COURSE_DIR
+```
+
+脚本只读取 `textbook/chapters/*.md` 中的 `# / ## / ### / [¶XXXX]`，按固定契约生成：
+- `chXX-00`
+- `chXX-YY`
+- `chXX-YY-ZZ`
+- `chXX-test`
+
+若某个 `##` 下没有 `###`，但该节正文段落数 `> 15` 或公式密集，脚本必须确定性生成虚拟 `lesson`：`chXX-YY-01`、`chXX-YY-02`……；此时 `chXX-YY` 只保留为 `section-overview` 概览，正文范围写 `无独立正文`。虚拟课次用于正式教学和正式题，避免只有二级标题的教材退化成“全是概述、没有掌握闭环”。
+
+脚本会跳过 `总教材.md`、`00-书目信息.md`、`示例-*`、`模板*` 和非数字前缀的附录/答案文件；如发现同一章号对应多个章节文件、数字前缀与 H1 章号不一致，或数字前缀文件无法解析 `# 第N章 ...`，会直接失败并要求回到阶段 C 修正拆分产物。
 
 ### 阶段 I：学习路径生成
 
 进入 `learning-path/`，为每章生成学习路径文件。
 
+`course-map.md` 与 `chapter-XX.md` 不再由模型手写，而是由脚本稳定生成：
+
+```text
+python -X utf8 scripts/build_learning_path.py COURSE_DIR
+```
+
 **步骤**：
 
-1. **生成 `course-map.md`**：从阶段 B 的结构信息生成章级导航总表
+1. **生成 `course-map.md`**：从 `learning-path/unit-manifest.json` 生成章级导航总表
 2. **为每章生成 `chapter-XX.md`**：命名规则 `chapter-{XX}.md`（如 `chapter-03.md`）
-3. **映射到教学指引**：将阶段 H 生成的每个 `.teaching.md` 文件映射为学习路径中的一个单元
+3. **映射到教学指引**：只消费 manifest，不重新推断单元
+
+### 阶段 K：最终一致性校验
+
+阶段 K 不得只检查“文件是否存在”，还必须运行：
+
+```text
+python -X utf8 scripts/clean_template_artifacts.py COURSE_DIR --check
+python -X utf8 scripts/normalize_image_refs.py COURSE_DIR --check
+python -X utf8 scripts/validate_learning_path_bundle.py COURSE_DIR
+python -X utf8 scripts/validate_teaching_guides_bundle.py COURSE_DIR
+python -X utf8 scripts/validate_course_quality.py COURSE_DIR
+python -X utf8 scripts/build_pipeline_diagnostics.py COURSE_DIR
+```
+
+该校验不仅检查文件是否齐全，还必须比对每个 `.teaching.md` 的 `原文定位` 与 manifest：`单元类型 / 正文范围 / 公式密集 / 高负荷课次` 必须完全一致，并检查文件内所有 `¶XXXX` / `¶XXXX-¶XXXX` 引用都落在本单元 `正文范围` 内。
+`build_pipeline_diagnostics.py` 必须在清理本地配置前生成 `logs/pipeline-diagnostics.md` 和 `logs/pipeline-diagnostics.json`，用于复盘结构计数、validator 结果、阶段 H 关键事件、弱引用统计、图片断链、图片目录规范和密钥风险扫描；不得记录 token、完整教材正文或完整教学指引正文。
+
+只有当正式产物目录无 `示例-*` / `模板*` 生产文件、无重复章号章节文件，且 `unit-manifest.json`、`course-map.md` 和全部 `chapter-XX.md` 同时通过校验时，才能判定学习路径层稳定闭环。
+只有当 manifest 中所有 `teaching_file` 都存在、没有多余 `.teaching.md`、每个教学指引通过校验、文件内全部段落引用都落在本单元正文范围内，且 `audit-report.md` 覆盖全部章节并且文件数与 manifest 一致时，才能判定教学指引层完整。
 
 **`chapter-XX.md` 模板结构**：
 ```markdown
@@ -1067,23 +1051,23 @@ knowledge/teaching-guides/chapter-02/
 
 | 顺序 | 单元ID | 小节 | 知识点指引 | 教材段落 | 类型 | 默认状态 | 下一单元 |
 |---:|---|---|---|---|---|---|---|
-| 1 | `chXX-00` | 第X章 引言 | `knowledge/teaching-guides/chapter-XX/XX-00-*.teaching.md` | ¶XXXX-¶XXXX | 概念引入 | 未开始 | `chXX-01` |
-| 2 | `chXX-01` | §X.Y | `...teaching.md` | ¶XXXX-¶XXXX | 核心概念 | 未开始 | `chXX-01-01` |
+| 1 | `chXX-00` | 第X章 引言 | `knowledge/teaching-guides/chapter-XX/00-introduction.teaching.md` | ¶XXXX-¶XXXX 或 无独立正文 | 章引言 | 未开始 | `chXX-01` |
+| 2 | `chXX-01` | §X.Y 单元概述 | `knowledge/teaching-guides/chapter-XX/01-intro.teaching.md` | ¶XXXX-¶XXXX 或 无独立正文 | 单元概览 | 未开始 | `chXX-01-01` |
 | ... | ... | ... | ... | ... | ... | ... | ... |
 | N | `chXX-test` | 第X章章测 | 无新增讲义 | 第X章已解锁段落 | 章测 | 未开始 | 下一章 |
 ```
 
 **单元ID 命名规范**：
 - `chXX-00`：第X章引言
-- `chXX-01`：第X章 §X.1（对应教学指引 `XX-01-*.teaching.md`）
+- `chXX-01`：第X章 §X.1（对应教学指引 `XX-intro.teaching.md`）
 - `chXX-01-01`：第X章 §X.1.1
 - `chXX-test`：第X章章测
 
 **映射规则**：
 - 每个 `.teaching.md` 文件 → 学习路径表中的一行
 - `知识点指引` 列指向对应的 `.teaching.md` 文件路径
-- `教材段落` 列从 `.teaching.md` 的「原文定位」字段提取
-- `类型` 根据内容性质填写（概念引入 / 核心概念 / 关键概念 / 历史脉络 / 工具概览 / 章测等）
+- `教材段落` 列从 manifest 的 `paragraph_range` 提取
+- `类型` 根据内容性质填写（章引言 / 单元概览 / 核心概念 / 关键概念 / 历史脉络 / 工具概览 / 章测等）
 - `默认状态` 统一为 `未开始`
 - `下一单元` 按顺序指向下一个单元ID
 
@@ -1093,8 +1077,8 @@ knowledge/teaching-guides/chapter-02/
 
 | 顺序 | 章节 | 主题 | 路线文件 | 当前状态 | 说明 |
 |---:|---|---|---|---|---|
-| 0 | 序/前言/符号表 | 课程背景和符号约定 | 待补 | 参考 | 非正式教学主线 |
-| 1 | 第1章 {标题} | ... | `learning-path/chapter-01.md` | 已建立 |  |
+| 1 | 第X章 {标题} | {主题关键词} | `learning-path/chapter-XX.md` | 已建立详细路线 | 从 manifest 自动生成 |
+| 2 | 第Y章 {标题} | {主题关键词} | `learning-path/chapter-YY.md` | 已建立详细路线 | 与章级路线同步 |
 | ... | ... | ... | ... | ... |  |
 ```
 
@@ -1112,23 +1096,23 @@ knowledge/teaching-guides/chapter-02/
 6. **生成 `logs/learning-sessions/README.md`**：从模板复制，替换 {{COURSE_SHORT_NAME}}
 
 **数据来源**：
-- 单元ID 列表：从阶段 I 的 `learning-path/chapter-XX.md` 提取
-- 第一个单元：`ch01-00`（或用户指定的起始单元）
-- 模板内容：从 `guide/neural-networks/` 对应文件复制
+- 单元ID 列表：优先从 `learning-path/unit-manifest.json` 提取，并以对应 `chapter-XX.md` 的顺序落盘
+- 第一个单元：由 `START_ENTRY` 和 manifest 共同决定，不得硬编码
+- 模板内容：从 `guide/模板course/` 对应文件复制
 
 **`progress/current-position.md` 模板**：
 ```markdown
 # 当前学习进度
 
 - 当前课程：{{COURSE_NAME}}
-- 当前章节：第1章 {标题}
-- 当前单元：`ch01-00`
+- 当前章节：第X章 {标题}
+- 当前单元：`chXX-00`
 - 当前小节：{引言或第一节标题}
-- 当前知识点指引：`knowledge/teaching-guides/chapter-01/{第一个teaching文件}`
-- 当前教材文件：`textbook/chapters/{第一章文件}`
+- 当前知识点指引：`knowledge/teaching-guides/chapter-XX/{起始teaching文件}`
+- 当前教材文件：`textbook/chapters/{起始章节文件}`
 - 当前教材段落：`¶XXXX-¶XXXX`
 - 当前状态：未开始
-- 下一单元：`ch01-01`
+- 下一单元：`chXX-01`
 - 最近更新时间：{生成日期}
 
 ## AI 教学入口
@@ -1141,7 +1125,7 @@ knowledge/teaching-guides/chapter-02/
 4. `progress/current-position.md`
 5. `progress/mastery-tracker.md`
 6. `review/mistakes.md`
-7. `learning-path/chapter-01.md`
+7. `learning-path/chapter-XX.md`
 8. 对应 `knowledge/teaching-guides/.../*.teaching.md`
 9. `textbook/chapters/*.md` 中指定段落
 10. `practice/task-generation-rules.md`
