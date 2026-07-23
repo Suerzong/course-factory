@@ -230,7 +230,7 @@ course-root/
 
 ```bash
 # 1. 克隆仓库
-git clone https://github.com/Suerzong/fac.git
+git clone https://github.com/Suerzong/course-factory.git
 cd fac
 
 # 2. 配置 Claude Code Hook

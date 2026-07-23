@@ -167,7 +167,7 @@ Validators check specific, concrete things — e.g., learning objectives use act
 ## Quick Start
 
 ```bash
-git clone https://github.com/Suerzong/fac.git
+git clone https://github.com/Suerzong/course-factory.git
 cd fac
 cp .claude/settings.example.json .claude/settings.local.json
 
